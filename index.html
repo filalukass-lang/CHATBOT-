@@ -954,6 +954,7 @@ select.fi option { background:var(--bg); }
   animation:fade-in .22s ease both;
 }
 .sh-sheet {
+  overflow-y:auto;
   width:100%; max-width:500px; margin:0 auto;
   background:var(--glass-1);
   border:1px solid var(--rim);
@@ -1048,7 +1049,7 @@ select.fi option { background:var(--bg); }
 .stab-pane.active { display:flex; }
 
 /* Model cards */
-.model-list { display:flex; flex-direction:column; gap:6px; }
+.model-list { display:flex; flex-direction:column; gap:6px; max-height:320px; overflow-y:auto; padding-right:2px; }
 .model-card {
   display:flex; align-items:center; gap:11px; padding:10px 12px;
   border-radius:var(--r-sm); border:1.5px solid var(--rim-soft);
@@ -1291,12 +1292,15 @@ button:active:not(.send-btn):not(.su-btn):not(.img-gen-btn):not(.sh-save) {
       <div class="fg"><div class="f-lbl">OpenRouter API Key *</div><input class="fi" id="apiKey" type="password" placeholder="sk-or-v1-…" autocomplete="off"></div>
       <div class="fg"><div class="f-lbl">Model</div>
         <select class="fi" id="mdl">
-          <option value="openrouter/auto">Auto — nejspolehlivější</option>
-          <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B</option>
-          <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
-          <option value="google/gemma-3-27b-it:free">Gemma 3 27B</option>
-          <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 24B</option>
-          <option value="qwen/qwen3-235b-a22b:free">Qwen 3 235B</option>
+          <option value="openrouter/auto">⚡ Auto — nejspolehlivější</option>
+          <option value="google/gemini-2.5-pro-exp-03-25:free">🔮 Gemini 2.5 Pro (free)</option>
+          <option value="google/gemini-2.0-flash-exp:free">🚀 Gemini 2.0 Flash (free)</option>
+          <option value="meta-llama/llama-3.3-70b-instruct:free">🦙 Llama 3.3 70B (free)</option>
+          <option value="mistralai/mistral-small-3.1-24b-instruct:free">🌊 Mistral Small 3.1 (free)</option>
+          <option value="qwen/qwen3-235b-a22b:free">🐉 Qwen 3 235B (free)</option>
+          <option value="anthropic/claude-3.5-sonnet">🎭 Claude 3.5 Sonnet</option>
+          <option value="openai/gpt-4o">🧠 GPT-4o</option>
+          <option value="openai/gpt-4o-mini">🟢 GPT-4o Mini</option>
         </select>
       </div>
       <div class="fi-sep">volitelné</div>
@@ -1622,10 +1626,12 @@ function applyDark(on, animate){
   }
   if(on){
     document.documentElement.dataset.dark='1';
-    document.getElementById('darkIcon').innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    var _di=document.getElementById('darkIcon');
+    if(_di)_di.innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   } else {
     delete document.documentElement.dataset.dark;
-    document.getElementById('darkIcon').innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    var _di=document.getElementById('darkIcon');
+    if(_di)_di.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   }
 }
 function toggleDark(){
@@ -1809,6 +1815,7 @@ function startChat(){
     setup.style.display='none';
     document.getElementById('app').style.display='flex';
     applyConfig();newChat();renderSidebar();
+    if(darkMode)applyDark(true,false);
     showToast('✦ Vítej v LFX-D1');
   },550);
 }
@@ -1859,7 +1866,7 @@ function deleteChat(id,e){
     var s=getActive();
     if(s&&s.hist.length){
       var w=document.getElementById('welcome');if(w)w.remove();
-      for(var i=0;i<s.hist.length;i++){var m=s.hist[i];if(m.role==='user')addUserMsg(m.content,true);else if(m.role==='assistant')addBotMsg(m.content,true);}
+      for(var i=0;i<s.hist.length;i++){var m=s.hist[i];if(m.role==='user'){var _uc=Array.isArray(m.content)?((m.content.find(function(x){return x.type==='text';})||{}).text||''):m.content;addUserMsg(_uc,true);}else if(m.role==='assistant')addBotMsg(m.content,true);}
     }
   }
   saveAll();renderSidebar();
@@ -1963,6 +1970,7 @@ async function llmStream(msgs, imgAtts, targetEl){
     var err=await r.json().catch(function(){return{};});
     throw new Error((err.error&&err.error.message)||'HTTP '+r.status);
   }
+  if(!r.body)throw new Error('No response body');
   var reader=r.body.getReader();
   var decoder=new TextDecoder();
   var fullText='';
@@ -1972,37 +1980,38 @@ async function llmStream(msgs, imgAtts, targetEl){
   cursor.className='stream-cursor';
   targetEl.appendChild(cursor);
   var lastRender=0;
-  while(true){
-    var chunk=await reader.read();
-    if(chunk.done) break;
-    buf+=decoder.decode(chunk.value,{stream:true});
-    var lines=buf.split('\n');
-    buf=lines.pop();
-    for(var i=0;i<lines.length;i++){
-      var line=lines[i].trim();
-      if(!line||line==='data: [DONE]') continue;
-      if(line.startsWith('data: ')){
-        try{
-          var parsed=JSON.parse(line.slice(6));
-          var delta=parsed.choices&&parsed.choices[0]&&parsed.choices[0].delta;
-          if(delta&&delta.content){
-            fullText+=delta.content;
-            /* Throttle render to ~30fps for perf */
-            var now=Date.now();
-            if(now-lastRender>33){
-              lastRender=now;
-              targetEl.innerHTML=marked.parse(fullText);
-              targetEl.appendChild(cursor);
-              scroll();
+  try{
+    while(true){
+      var chunk=await reader.read();
+      if(chunk.done) break;
+      buf+=decoder.decode(chunk.value,{stream:true});
+      var lines=buf.split('\n');
+      buf=lines.pop();
+      for(var li=0;li<lines.length;li++){
+        var line=lines[li].trim();
+        if(!line||line==='data: [DONE]') continue;
+        if(line.startsWith('data: ')){
+          try{
+            var parsed=JSON.parse(line.slice(6));
+            var delta=parsed.choices&&parsed.choices[0]&&parsed.choices[0].delta;
+            if(delta&&delta.content){
+              fullText+=delta.content;
+              var now=Date.now();
+              if(now-lastRender>33){
+                lastRender=now;
+                targetEl.innerHTML=marked.parse(fullText);
+                targetEl.appendChild(cursor);
+                scroll();
+              }
             }
-          }
-        }catch(e){}
+          }catch(e){}
+        }
       }
     }
+  } finally {
+    if(cursor.parentNode)cursor.remove();
   }
-  /* Final render without cursor */
-  cursor.remove();
-  targetEl.innerHTML=marked.parse(fullText||'');
+  if(fullText)targetEl.innerHTML=marked.parse(fullText);
   scroll();
   return fullText;
 }
@@ -2261,7 +2270,7 @@ async function send(){
   var ans='';
   try{
     /* Small delay so thinking animation shows */
-    await new Promise(function(r){setTimeout(r,180);});
+    await new Promise(function(res){setTimeout(res,180);});
     /* Create bot row to stream into */
     ty.remove();_clearThinkTimers();
     var streamRow=addBotMsgStreaming();
@@ -2275,7 +2284,12 @@ async function send(){
   }catch(ex){
     if(ty&&ty.parentNode)ty.remove();
     _clearThinkTimers();
-    if(ex.name==='AbortError'){/* user stopped */}
+    if(typeof streamRow!=='undefined'&&streamRow&&streamRow.parentNode){
+      var _st=streamRow.querySelector('.msg-text');
+      if(!_st||!_st.textContent.trim()){streamRow.remove();}
+      else{finalizeStreamRow(streamRow,_st.innerHTML||'');}
+    }
+    if(ex.name==='AbortError'){/* stopped by user */}
     else{
       var em=ex.message||'Chyba';
       if(em.indexOf('401')>=0||em.indexOf('Unauthorized')>=0)em='❌ Špatný API klíč — zkontroluj nastavení.';
@@ -2476,6 +2490,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('setup').style.display='none';
     document.getElementById('app').style.display='flex';
     applyConfig();newChat();renderSidebar();
+    if(darkMode)applyDark(true,false);
   } else {
     document.getElementById('setup').style.display='flex';
     document.getElementById('app').style.display='none';
